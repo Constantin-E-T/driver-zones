@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Zone } from '@prisma/client';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,6 +36,9 @@ export function ZoneEditDialog({ zone, open, onOpenChange, onSave }: ZoneEditDia
             <DialogContent className="sm:max-w-[425px] bg-zinc-900 text-white border-zinc-800">
                 <DialogHeader>
                     <DialogTitle>Edit Zone</DialogTitle>
+                    <DialogDescription className="text-zinc-400">
+                        Make changes to the zone details below.
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">

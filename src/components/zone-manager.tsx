@@ -99,7 +99,10 @@ export function ZoneManager({ initialZones }: ZoneManagerProps) {
                             <Menu className="h-6 w-6 text-white" />
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="w-[85vw] sm:w-[400px] p-0 bg-zinc-950 border-r-zinc-800">
+                    <SheetContent side="left" className="w-[85vw] sm:w-[400px] p-0 bg-zinc-950 border-r border-zinc-800">
+                        <SheetHeader className="sr-only">
+                            <SheetTitle>Zone Management</SheetTitle>
+                        </SheetHeader>
                         <ZoneList
                             zones={zones}
                             onDelete={handleDeleteZone}
