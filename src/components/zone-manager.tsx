@@ -2,8 +2,11 @@
 
 import { useOptimistic, useTransition, useState } from 'react';
 import { Zone } from '@prisma/client';
-import Map from '@/components/map';
+import dynamic from 'next/dynamic';
 import { ZoneList } from '@/components/zone-list';
+
+// Dynamically import Map component to avoid SSR issues with Leaflet
+const Map = dynamic(() => import('@/components/map'), { ssr: false });
 import { createZone, deleteZone, updateZone } from '@/actions/zones';
 import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
