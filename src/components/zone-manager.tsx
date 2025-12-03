@@ -6,6 +6,9 @@ import Map from '@/components/map';
 import { ZoneList } from '@/components/zone-list';
 import { createZone, deleteZone, updateZone } from '@/actions/zones';
 import { toast } from 'sonner';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Menu } from 'lucide-react';
 
 interface ZoneManagerProps {
     initialZones: Zone[];
@@ -84,21 +87,33 @@ export function ZoneManager({ initialZones }: ZoneManagerProps) {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-4rem)] md:flex-row gap-4 p-4">
-            <div className="w-full md:w-2/3 h-[50vh] md:h-full rounded-xl overflow-hidden border border-border shadow-sm">
+        <div className="relative w-full h-full">
+            {/* Menu Button */}
+            <div className="absolute top-4 left-4 z-[1000]">
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button size="icon" className="h-12 w-12 rounded-full shadow-xl bg-zinc-900 border border-zinc-700 hover:bg-zinc-800">
+                            <Menu className="h-6 w-6 text-white" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-[85vw] sm:w-[400px] p-0 bg-zinc-950 border-r-zinc-800">
+                        <ZoneList
+                            zones={zones}
+                            onDelete={handleDeleteZone}
+                            onCreate={handleCreateZone}
+                            onUpdate={handleUpdateZone}
+                            markerLocation={markerLocation}
+                        />
+                    </SheetContent>
+                </Sheet>
+            </div>
+
+            {/* Full Screen Map */}
+            <div className="w-full h-full">
                 <Map
                     zones={zones}
                     onLocationChange={setMarkerLocation}
                     onCreateZone={(lat, lng) => setMarkerLocation({ lat, lng })}
-                />
-            </div>
-            <div className="w-full md:w-1/3 h-[40vh] md:h-full flex flex-col gap-4">
-                <ZoneList
-                    zones={zones}
-                    onDelete={handleDeleteZone}
-                    onCreate={handleCreateZone}
-                    onUpdate={handleUpdateZone}
-                    markerLocation={markerLocation}
                 />
             </div>
         </div>

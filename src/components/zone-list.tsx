@@ -33,13 +33,12 @@ export function ZoneList({ zones, onDelete, onCreate, onUpdate, markerLocation }
     };
 
     return (
-        <div className="flex flex-col h-full bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="p-4 border-b border-zinc-800 space-y-4">
+        <div className="flex flex-col h-full bg-zinc-950 text-white">
+            <div className="p-4 border-b border-zinc-800 space-y-4 pt-12">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-blue-500" />
                     Zones ({zones.length})
                 </h2>
-
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                     <Input

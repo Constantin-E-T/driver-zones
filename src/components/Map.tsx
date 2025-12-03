@@ -139,7 +139,11 @@ export default function Map({ zones, onLocationChange, onCreateZone }: MapProps)
                             fillOpacity: 0.2
                         }}
                     >
-                        <Tooltip direction="center" className="bg-transparent border-none shadow-none text-white font-bold text-sm">
+                        <Tooltip
+                            permanent
+                            direction="center"
+                            className="bg-transparent border-none shadow-none text-white font-bold text-sm text-shadow-sm"
+                        >
                             {zone.name}
                         </Tooltip>
                     </Circle>
