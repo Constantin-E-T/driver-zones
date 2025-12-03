@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Circle, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { Zone, UserLocation } from '@/lib/types';
-import { Locate, Navigation } from 'lucide-react';
+import { Zone } from '@prisma/client';
+import { Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // Fix for default Leaflet markers in Next.js
@@ -27,66 +27,68 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapProps {
     zones: Zone[];
-    onAddZone: (lat: number, lng: number) => void;
+    onLocationChange: (location: { lat: number; lng: number }) => void;
+    onCreateZone: (lat: number, lng: number) => void;
 }
 
-function LocationMarker({ location, follow }: { location: UserLocation | null, follow: boolean }) {
+function LocationMarker({
+    onLocationChange,
+    onCreateZone
+}: {
+    onLocationChange: (loc: { lat: number; lng: number }) => void,
+    onCreateZone: (lat: number, lng: number) => void
+}) {
+    const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
     const map = useMap();
+    const markerRef = useRef<L.Marker>(null);
 
     useEffect(() => {
-        if (location && follow) {
-            map.flyTo([location.lat, location.lng], map.getZoom());
-        }
-    }, [location, follow, map]);
+        map.locate().on("locationfound", function (e) {
+            setPosition(e.latlng);
+            onLocationChange(e.latlng);
+            map.flyTo(e.latlng, map.getZoom());
+        });
+    }, [map, onLocationChange]);
 
-    if (!location) return null;
+    const eventHandlers = useMemo(
+        () => ({
+            dragend() {
+                const marker = markerRef.current;
+                if (marker != null) {
+                    const newPos = marker.getLatLng();
+                    setPosition(newPos);
+                    onLocationChange(newPos);
+                }
+            },
+            click() {
+                const marker = markerRef.current;
+                if (marker != null) {
+                    const pos = marker.getLatLng();
+                    onCreateZone(pos.lat, pos.lng);
+                }
+            }
+        }),
+        [onLocationChange, onCreateZone],
+    );
+
+    if (position === null) return null;
 
     return (
-        <Marker position={[location.lat, location.lng]}>
-            {/* We can customize this marker later to look like a car or dot */}
+        <Marker
+            draggable={true}
+            eventHandlers={eventHandlers}
+            position={position}
+            ref={markerRef}
+        >
+            <Tooltip permanent direction="top" className="bg-blue-600 text-white border-none">
+                Drag me to set location
+            </Tooltip>
         </Marker>
     );
 }
 
-export default function Map({ zones, onAddZone }: MapProps) {
-    const [location, setLocation] = useState<UserLocation | null>(null);
-    const [followUser, setFollowUser] = useState(true);
-
+export default function Map({ zones, onLocationChange, onCreateZone }: MapProps) {
     const [mapStyle, setMapStyle] = useState<'satellite' | 'dark' | 'light'>('satellite');
-
-    useEffect(() => {
-        if (!navigator.geolocation) {
-            console.error('Geolocation is not supported by your browser');
-            return;
-        }
-
-        const watchId = navigator.geolocation.watchPosition(
-            (position) => {
-                setLocation({
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                });
-            },
-            (error) => {
-                console.error('Error getting location:', error);
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0,
-            }
-        );
-
-        return () => navigator.geolocation.clearWatch(watchId);
-    }, []);
-
-    // Handler to stop following when user drags map
-    function MapEvents() {
-        useMapEvents({
-            dragstart: () => setFollowUser(false),
-        });
-        return null;
-    }
 
     const getTileLayer = () => {
         switch (mapStyle) {
@@ -124,8 +126,7 @@ export default function Map({ zones, onAddZone }: MapProps) {
                     url={tileLayer.url}
                 />
 
-                <MapEvents />
-                <LocationMarker location={location} follow={followUser} />
+                <LocationMarker onLocationChange={onLocationChange} onCreateZone={onCreateZone} />
 
                 {zones.map((zone) => (
                     <Circle
@@ -133,12 +134,12 @@ export default function Map({ zones, onAddZone }: MapProps) {
                         center={[zone.lat, zone.lng]}
                         radius={zone.radius}
                         pathOptions={{
-                            color: '#ef4444', // Always red for visibility
+                            color: '#ef4444',
                             fillColor: '#ef4444',
                             fillOpacity: 0.2
                         }}
                     >
-                        <Tooltip permanent direction="center" className="bg-transparent border-none shadow-none text-white font-bold text-sm">
+                        <Tooltip direction="center" className="bg-transparent border-none shadow-none text-white font-bold text-sm">
                             {zone.name}
                         </Tooltip>
                     </Circle>
@@ -160,17 +161,7 @@ export default function Map({ zones, onAddZone }: MapProps) {
                     {mapStyle === 'satellite' ? "🛰️" : mapStyle === 'dark' ? "🌙" : "☀️"}
                 </Button>
             </div>
-
-            <div className="absolute bottom-24 right-4 z-[1000] flex flex-col gap-2">
-                <Button
-                    variant={followUser ? "default" : "secondary"}
-                    size="icon"
-                    onClick={() => setFollowUser(true)}
-                    className="rounded-full h-12 w-12 shadow-lg"
-                >
-                    <Navigation className={`h-6 w-6 ${followUser ? "text-primary-foreground" : ""}`} />
-                </Button>
-            </div>
         </div>
     );
 }
+

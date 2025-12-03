@@ -2,7 +2,7 @@
 
 import { useOptimistic, useTransition, useState } from 'react';
 import { Zone } from '@prisma/client';
-import { Map } from '@/components/map';
+import Map from '@/components/map';
 import { ZoneList } from '@/components/zone-list';
 import { createZone, deleteZone, updateZone } from '@/actions/zones';
 import { toast } from 'sonner';
