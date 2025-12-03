@@ -236,9 +236,9 @@ export default function Map({ zones }: MapProps) {
                 className="h-full w-full"
                 style={{ zIndex: 0 }}
                 zoomControl={false}
+                attributionControl={false}
             >
                 <TileLayer
-                    attribution={tileLayer.attribution}
                     url={tileLayer.url}
                 />
 
@@ -266,10 +266,19 @@ export default function Map({ zones }: MapProps) {
                         <Tooltip
                             permanent
                             direction="center"
-                            className="bg-transparent border-none shadow-none text-white font-bold text-sm"
-                            style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}
+                            className="!bg-transparent !border-0 !shadow-none !p-0"
                         >
-                            {zone.name}
+                            <div style={{
+                                color: 'white',
+                                fontWeight: '700',
+                                fontSize: '14px',
+                                textShadow: '2px 2px 4px rgba(0,0,0,0.95), -1px -1px 3px rgba(0,0,0,0.95), 1px 1px 3px rgba(0,0,0,0.95)',
+                                whiteSpace: 'nowrap',
+                                pointerEvents: 'none',
+                                letterSpacing: '0.3px',
+                            }}>
+                                {zone.name}
+                            </div>
                         </Tooltip>
                     </Circle>
                 ))}

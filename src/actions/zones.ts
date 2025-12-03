@@ -17,7 +17,7 @@ export async function createZone(data: CreateZoneInput) {
         });
         revalidatePath('/');
         revalidatePath('/zones');
-        revalidateTag('zones');
+        revalidateTag('zones', 'default');
         return { success: true, data: zone };
     } catch (error) {
         console.error('Failed to create zone:', error);
@@ -39,7 +39,7 @@ export async function updateZone(id: string, data: UpdateZoneInput) {
         });
         revalidatePath('/');
         revalidatePath('/zones');
-        revalidateTag('zones');
+        revalidateTag('zones', 'default');
         return { success: true, data: zone };
     } catch (error) {
         console.error('Failed to update zone:', error);
@@ -54,7 +54,7 @@ export async function deleteZone(id: string) {
         });
         revalidatePath('/');
         revalidatePath('/zones');
-        revalidateTag('zones');
+        revalidateTag('zones', 'default');
         return { success: true };
     } catch (error) {
         console.error('Failed to delete zone:', error);
