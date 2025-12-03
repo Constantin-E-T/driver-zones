@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Circle, Tooltip, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Circle, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Zone } from '@prisma/client';
 import { Plus, MapPin as MapPinIcon } from 'lucide-react';
@@ -164,11 +164,22 @@ function PlacementMarker({
     );
 }
 
+// Component to handle map events like zoom
+function MapEvents({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
+    const map = useMapEvents({
+        zoomend: () => {
+            onZoomChange(map.getZoom());
+        },
+    });
+    return null;
+}
+
 export default function Map({ zones }: MapProps) {
     const [mapStyle, setMapStyle] = useState<'satellite' | 'dark' | 'light'>('satellite');
     const [isPlacementMode, setIsPlacementMode] = useState(false);
     const [placementPosition, setPlacementPosition] = useState<{ lat: number; lng: number } | null>(null);
     const [showQuickDialog, setShowQuickDialog] = useState(false);
+    const [currentZoom, setCurrentZoom] = useState(13);
 
     const getTileLayer = () => {
         switch (mapStyle) {
@@ -227,6 +238,7 @@ export default function Map({ zones }: MapProps) {
     };
 
     const tileLayer = getTileLayer();
+    const showLabels = currentZoom >= 14; // Only show labels when zoomed in
 
     return (
         <div className="relative h-full w-full">
@@ -238,6 +250,7 @@ export default function Map({ zones }: MapProps) {
                 zoomControl={false}
                 attributionControl={false}
             >
+                <MapEvents onZoomChange={setCurrentZoom} />
                 <TileLayer
                     url={tileLayer.url}
                 />
@@ -263,23 +276,27 @@ export default function Map({ zones }: MapProps) {
                             weight: 2,
                         }}
                     >
-                        <Tooltip
-                            permanent
-                            direction="center"
-                            className="!bg-transparent !border-0 !shadow-none !p-0"
-                        >
-                            <div style={{
-                                color: 'white',
-                                fontWeight: '700',
-                                fontSize: '14px',
-                                textShadow: '2px 2px 4px rgba(0,0,0,0.95), -1px -1px 3px rgba(0,0,0,0.95), 1px 1px 3px rgba(0,0,0,0.95)',
-                                whiteSpace: 'nowrap',
-                                pointerEvents: 'none',
-                                letterSpacing: '0.3px',
-                            }}>
-                                {zone.name}
-                            </div>
-                        </Tooltip>
+                        {showLabels && (
+                            <Tooltip
+                                permanent
+                                direction="center"
+                                className="!bg-transparent !border-0 !shadow-none !p-0"
+                            >
+                                <div style={{
+                                    color: 'white',
+                                    fontWeight: '800',
+                                    fontSize: '14px',
+                                    textShadow: '0 0 4px rgba(0,0,0,1), 0 0 2px rgba(0,0,0,1)',
+                                    whiteSpace: 'nowrap',
+                                    pointerEvents: 'none',
+                                    letterSpacing: '0.5px',
+                                    textAlign: 'center',
+                                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                                }}>
+                                    {zone.name}
+                                </div>
+                            </Tooltip>
+                        )}
                     </Circle>
                 ))}
             </MapContainer>
