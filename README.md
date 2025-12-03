@@ -116,11 +116,21 @@ The app can be installed as a Progressive Web App:
 
 - **Framework:** Next.js 16 with App Router
 - **React:** React 19 with React Compiler
-- **Maps:** Leaflet + React Leaflet
-- **Styling:** Tailwind CSS v4
-- **UI Components:** Radix UI primitives
-- **Icons:** Lucide React
-- **PWA:** Next PWA configuration
+- **UI**: Tailwind CSS, Radix UI, Lucide React
+- **Maps**: Leaflet (React Leaflet)
+- **State**: React 19 (useOptimistic, useTransition)
+
+## Available UI Components
+
+The following components are available for use in the application (powered by Shadcn UI):
+
+- Accordion, Alert Dialog, Alert, Aspect Ratio, Avatar, Badge, Breadcrumb, Button Group, Button
+- Calendar, Card, Carousel, Chart, Checkbox, Collapsible, Combobox, Command, Context Menu
+- Data Table, Date Picker, Dialog, Drawer, Dropdown Menu, Empty, Field, Form, Hover Card
+- Input Group, Input OTP, Input, Item, Kbd, Label, Menubar, Native Select, Navigation Menu
+- Pagination, Popover, Progress, Radio Group, Resizable, Scroll Area, Select, Separator
+- Sheet, Sidebar, Skeleton, Slider, Sonner, Spinner, Switch, Table, Tabs, Textarea, Toast
+- Toggle Group, Toggle, Tooltip, Typography
 
 ## 📄 License
 
