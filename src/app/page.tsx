@@ -1,65 +1,115 @@
-import Image from "next/image";
+'use client';
+
+import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
+import { Zone } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import ZoneList from '@/components/ZoneList';
+import { DEFAULT_ZONES } from '@/lib/constants';
+
+// Dynamically import Map to avoid SSR issues with Leaflet
+const Map = dynamic(() => import('@/components/Map'), {
+  ssr: false,
+  loading: () => <div className="h-full w-full bg-zinc-900 flex items-center justify-center text-white">Loading Map...</div>
+});
 
 export default function Home() {
+  const [zones, setZones] = useState<Zone[]>([]);
+
+
+
+
+
+  // Load zones from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('driver-zones');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // If we have saved zones, use them. If it's an empty array (previous session), load defaults.
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setZones(parsed);
+        } else {
+          setZones(DEFAULT_ZONES);
+        }
+      } catch (e) {
+        console.error('Failed to parse zones', e);
+        setZones(DEFAULT_ZONES);
+      }
+    } else {
+      // Load default zones if nothing saved
+      setZones(DEFAULT_ZONES);
+    }
+  }, []);
+
+  // Save zones whenever they change
+  useEffect(() => {
+    localStorage.setItem('driver-zones', JSON.stringify(zones));
+  }, [zones]);
+
+  const [isListOpen, setIsListOpen] = useState(false);
+
+  const handleAddZone = (lat: number, lng: number) => {
+    // Simple prompt for now - can be upgraded to a modal later
+    // We use a timeout to ensure the map click doesn't interfere if triggered that way
+    setTimeout(() => {
+      const name = window.prompt("Name this zone (e.g., 'Portsmouth Station'):", `Zone ${zones.length + 1}`);
+      if (name) {
+        const newZone: Zone = {
+          id: crypto.randomUUID(),
+          name,
+          lat,
+          lng,
+          radius: 500, // Default 500m radius
+          createdAt: Date.now(),
+        };
+        setZones([...zones, newZone]);
+      }
+    }, 100);
+  };
+
+  const handleDeleteZone = (id: string) => {
+    if (window.confirm('Delete this zone?')) {
+      setZones(zones.filter(z => z.id !== id));
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="flex h-screen w-screen flex-col bg-black overflow-hidden relative">
+      <div className="flex-1 relative h-full w-full">
+        <Map zones={zones} onAddZone={handleAddZone} />
+
+        {/* Main Action Button */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex gap-4">
+          <Button
+            size="lg"
+            className="rounded-full h-12 w-12 shadow-xl bg-zinc-800 border border-zinc-700 text-white"
+            onClick={() => setIsListOpen(true)}
+          >
+            <span className="font-bold text-lg">≡</span>
+          </Button>
+
+          <Button
+            size="lg"
+            className="rounded-full h-16 w-16 shadow-xl bg-blue-600 hover:bg-blue-700 border-4 border-black/20 text-white"
+            onClick={() => {
+              navigator.geolocation.getCurrentPosition(pos => {
+                handleAddZone(pos.coords.latitude, pos.coords.longitude);
+              });
+            }}
+          >
+            <Plus className="h-8 w-8" />
+          </Button>
+        </div>
+
+        <ZoneList
+          zones={zones}
+          onDeleteZone={handleDeleteZone}
+          isOpen={isListOpen}
+          onClose={() => setIsListOpen(false)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
