@@ -118,7 +118,8 @@ export default function Map({ zones, onLocationChange, onCreateZone }: MapProps)
             <MapContainer
                 center={[50.85, -1.18]} // Default to Portsmouth/Fareham area
                 zoom={13}
-                className="h-full w-full z-0"
+                className="h-full w-full"
+                style={{ zIndex: 0 }}
                 zoomControl={false}
             >
                 <TileLayer

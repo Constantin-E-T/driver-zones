@@ -92,10 +92,10 @@ export function ZoneManager({ initialZones }: ZoneManagerProps) {
     return (
         <div className="relative w-full h-full">
             {/* Menu Button */}
-            <div className="absolute top-4 left-4 z-[1000]">
+            <div className="absolute top-4 left-4 z-[10000] pointer-events-auto">
                 <Sheet>
                     <SheetTrigger asChild>
-                        <Button size="icon" className="h-12 w-12 rounded-full shadow-xl bg-zinc-900 border border-zinc-700 hover:bg-zinc-800">
+                        <Button size="icon" className="h-12 w-12 rounded-full shadow-2xl bg-zinc-900 border-2 border-zinc-700 hover:bg-zinc-800 hover:border-zinc-600">
                             <Menu className="h-6 w-6 text-white" />
                         </Button>
                     </SheetTrigger>
