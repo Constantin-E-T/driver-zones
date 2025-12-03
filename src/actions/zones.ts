@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { createZoneSchema, updateZoneSchema, type CreateZoneInput, type UpdateZoneInput } from '@/lib/validations/zone';
 
@@ -16,6 +16,8 @@ export async function createZone(data: CreateZoneInput) {
             data: result.data,
         });
         revalidatePath('/');
+        revalidatePath('/zones');
+        revalidateTag('zones');
         return { success: true, data: zone };
     } catch (error) {
         console.error('Failed to create zone:', error);
@@ -36,6 +38,8 @@ export async function updateZone(id: string, data: UpdateZoneInput) {
             data: result.data,
         });
         revalidatePath('/');
+        revalidatePath('/zones');
+        revalidateTag('zones');
         return { success: true, data: zone };
     } catch (error) {
         console.error('Failed to update zone:', error);
@@ -49,6 +53,8 @@ export async function deleteZone(id: string) {
             where: { id },
         });
         revalidatePath('/');
+        revalidatePath('/zones');
+        revalidateTag('zones');
         return { success: true };
     } catch (error) {
         console.error('Failed to delete zone:', error);

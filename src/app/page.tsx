@@ -1,15 +1,11 @@
-import { prisma } from '@/lib/prisma';
 import { ZoneManager } from '@/components/zone-manager';
-
-export const dynamic = 'force-dynamic';
+import { getCachedZones } from '@/lib/cached-zones';
 
 export default async function Home() {
-  const zones = await prisma.zone.findMany({
-    orderBy: { name: 'asc' },
-  });
+  const zones = await getCachedZones();
 
   return (
-    <main className="flex h-screen w-screen flex-col bg-black overflow-hidden relative">
+    <main className="flex h-screen w-screen flex-col bg-black overflow-hidden relative pt-14 pb-20 md:pt-16 md:pb-0">
       <ZoneManager initialZones={zones} />
     </main>
   );
