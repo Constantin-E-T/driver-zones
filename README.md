@@ -1,36 +1,147 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Map - Driver Zone Tracker
 
-## Getting Started
+A Progressive Web App (PWA) for drivers to visualize and manage their service zones on an interactive map. Available at **map.conn.digital**. Built with Next.js 16, React 19, and Leaflet.
 
-First, run the development server:
+## 🚀 Features
+
+- **99 Pre-loaded Zones** - Comprehensive coverage across Portsmouth, Havant, Waterlooville, Fareham, Gosport, Hayling Island, and Chichester
+- **Real-time GPS Tracking** - Live location tracking with automatic zone detection
+- **Custom Zone Creation** - Add your own zones by clicking on the map
+- **Zone Management** - View, sort, and delete zones in a convenient list
+- **Multiple Map Styles** - Toggle between satellite, dark, and light map views
+- **Zone Tooltips** - Hover to see zone names on the map
+- **PWA Support** - Install on your device for offline access
+- **Local Storage** - All zones saved locally, no account needed
+
+## 📋 Prerequisites
+
+- Node.js 20 or higher
+- pnpm (recommended package manager)
+
+## 🛠️ Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Install pnpm globally if you haven't already
+npm install -g pnpm
+
+# Install dependencies
+pnpm install
+
+# Copy environment variables
+cp .env.example .env
+
+# Start development server
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📦 Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env` file based on `.env.example`:
 
-## Learn More
+```env
+# Database (optional for this version)
+DATABASE_URL="postgresql://..."
 
-To learn more about Next.js, take a look at the following resources:
+# What3Words API (optional)
+WHAT3WORDS_API_KEY="your_api_key"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Production domain
+NEXT_PUBLIC_APP_URL="https://map.conn.digital"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🏗️ Build & Deploy
 
-## Deploy on Vercel
+### Development
+```bash
+pnpm dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Production Build
+```bash
+pnpm build
+pnpm start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### CapRover Deployment
+
+This app is configured for CapRover deployment:
+
+1. Push to your git repository
+2. Connect to CapRover
+3. Set environment variables in CapRover dashboard
+4. Deploy using `captain-definition`
+
+The Dockerfile uses:
+- Node 20 Alpine
+- pnpm for package management
+- Health checks for monitoring
+- Port 80 for production
+
+## 📱 PWA Installation
+
+The app can be installed as a Progressive Web App:
+
+1. Visit the site in a browser
+2. Look for the "Install" prompt
+3. Click "Install" to add to home screen
+4. Use like a native app with offline support
+
+## 🗺️ Zone Coverage
+
+**Portsmouth Area:**
+- Burrfields, Copnor, Portsea, Old Portsmouth, Stamshaw-Tipner
+- North End, Milton, Fratton-St Marys, Drayton East/West
+- Anchorage Park, Farlington, Langstone, Lakeside Harb
+- Paulsgrove, Wymering, Widley, Cosham
+
+**Havant & Waterlooville:**
+- Havant Town Centre, Havant Station, Havant East, Leigh Park
+- Bedhampton, Park Parade, Purbrook, Cowplain, Horndean
+- Crookhorn, Hazleton Estate, The Terraces, Warren Park
+
+**Fareham:**
+- Fareham Centre, Portchester, Titchfield, Locks Heath
+- Sarisbury Green, Warsash, Park Gate, Whiteley
+- Funtley, East St Fareham
+
+**Gosport:**
+- Gosport Town Centre, Ann's, Rowner South, Alverstoke
+- Elson South, Bridgemary South
+
+**Hayling Island:**
+- Hayling Ferry, Hayling Seafront, Hayling Beach, Hayling Bridge
+- Mengham, Mill Ryth, Northney
+
+**Emsworth to Chichester:**
+- Warblington, Emsworth, Westbourne, Southbourne
+- Nutbourne, Chidham, Bosham, Fishbourne
+- Hermitage, Chichester
+
+**Other Areas:**
+- Clanfield, Denmead, Boarhunt, Southampton Centre
+- Heathrow AIR, Asda locations
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js 16 with App Router
+- **React:** React 19 with React Compiler
+- **Maps:** Leaflet + React Leaflet
+- **Styling:** Tailwind CSS v4
+- **UI Components:** Radix UI primitives
+- **Icons:** Lucide React
+- **PWA:** Next PWA configuration
+
+## 📄 License
+
+Private project
+
+## 🤝 Support
+
+For issues or questions, contact the development team.
+
+---
+
+**Version:** 1.0.0  
+**Last Updated:** December 2025

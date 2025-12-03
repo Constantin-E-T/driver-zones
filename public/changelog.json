@@ -1,0 +1,52 @@
+{
+    "version": "1.0.0",
+    "releaseDate": "2025-12-03",
+    "changes": [
+        {
+            "type": "feature",
+            "title": "Initial Release - Driver Zone Mapper",
+            "description": "Interactive map-based zone management system for drivers to track and manage their service areas"
+        },
+        {
+            "type": "feature",
+            "title": "99 Pre-loaded Zones",
+            "description": "Comprehensive coverage across Portsmouth, Havant, Waterlooville, Fareham, Gosport, Hayling Island, and Chichester areas"
+        },
+        {
+            "type": "feature",
+            "title": "Real-time GPS Tracking",
+            "description": "Live location tracking with automatic zone detection - see which zones you're currently in"
+        },
+        {
+            "type": "feature",
+            "title": "Custom Zone Creation",
+            "description": "Add your own zones by clicking on the map - set custom names and radius for each zone"
+        },
+        {
+            "type": "feature",
+            "title": "Zone List Management",
+            "description": "View all zones in a sortable list - delete zones you no longer need with a single click"
+        },
+        {
+            "type": "feature",
+            "title": "Satellite Map View",
+            "description": "Toggle between satellite, dark, and light map styles for better visibility"
+        },
+        {
+            "type": "feature",
+            "title": "Zone Tooltips",
+            "description": "Hover over zones to see their names - easy identification on the map"
+        },
+        {
+            "type": "feature",
+            "title": "PWA Support",
+            "description": "Install the app on your device for offline access and native-like experience"
+        },
+        {
+            "type": "feature",
+            "title": "Local Storage",
+            "description": "All your custom zones are saved locally - no account needed, works offline"
+        }
+    ],
+    "previousVersions": []
+}
