@@ -1,12 +1,37 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Circle, Tooltip, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Zone } from '@prisma/client';
 import { Plus, MapPin as MapPinIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QuickZoneDialog } from './quick-zone-dialog';
+
+// Custom zone marker icon
+const createZoneIcon = () => {
+    return L.divIcon({
+        className: 'custom-zone-marker',
+        html: `
+            <div style="
+                width: 32px;
+                height: 32px;
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                border: 3px solid white;
+                border-radius: 50%;
+                box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+            ">📍</div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+    });
+};
 
 // Custom pulsing location marker icon
 const createLocationIcon = () => {
@@ -181,7 +206,6 @@ export default function Map({ zones }: MapProps) {
     const [isPlacementMode, setIsPlacementMode] = useState(false);
     const [placementPosition, setPlacementPosition] = useState<{ lat: number; lng: number } | null>(null);
     const [showQuickDialog, setShowQuickDialog] = useState(false);
-    const [currentZoom, setCurrentZoom] = useState(13);
 
     const getTileLayer = () => {
         switch (mapStyle) {
@@ -240,7 +264,6 @@ export default function Map({ zones }: MapProps) {
     };
 
     const tileLayer = getTileLayer();
-    const showLabels = currentZoom >= 14; // Only show labels when zoomed in
 
     return (
         <div className="relative h-full w-full">
@@ -252,7 +275,7 @@ export default function Map({ zones }: MapProps) {
                 zoomControl={false}
                 attributionControl={false}
             >
-                <MapEvents onZoomChange={setCurrentZoom} />
+
                 <TileLayer
                     url={tileLayer.url}
                 />
@@ -267,39 +290,28 @@ export default function Map({ zones }: MapProps) {
                 )}
 
                 {zones.map((zone) => (
-                    <Circle
+                    <Marker
                         key={zone.id}
-                        center={[zone.lat, zone.lng]}
-                        radius={zone.radius}
-                        pathOptions={{
-                            color: '#ef4444',
-                            fillColor: '#ef4444',
-                            fillOpacity: 0.2,
-                            weight: 2,
-                        }}
+                        position={[zone.lat, zone.lng]}
+                        icon={createZoneIcon()}
                     >
-                        {showLabels && (
-                            <Tooltip
-                                permanent
-                                direction="center"
-                                className="!bg-transparent !border-0 !shadow-none !p-0"
-                            >
-                                <div style={{
-                                    color: 'white',
-                                    fontWeight: '800',
-                                    fontSize: '14px',
-                                    textShadow: '0 0 4px rgba(0,0,0,1), 0 0 2px rgba(0,0,0,1)',
-                                    whiteSpace: 'nowrap',
-                                    pointerEvents: 'none',
-                                    letterSpacing: '0.5px',
-                                    textAlign: 'center',
-                                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                                }}>
-                                    {zone.name}
-                                </div>
-                            </Tooltip>
-                        )}
-                    </Circle>
+                        <Tooltip
+                            permanent
+                            direction="top"
+                            offset={[0, -20]}
+                            className="!bg-red-600 !border-white !border-2 !shadow-lg !px-3 !py-1 !rounded-full"
+                        >
+                            <div style={{
+                                color: 'white',
+                                fontWeight: '700',
+                                fontSize: '13px',
+                                whiteSpace: 'nowrap',
+                                letterSpacing: '0.3px',
+                            }}>
+                                {zone.name}
+                            </div>
+                        </Tooltip>
+                    </Marker>
                 ))}
             </MapContainer>
 
