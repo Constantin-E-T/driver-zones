@@ -5,9 +5,10 @@ import { Zone } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, MapPin, Trash2, Edit } from 'lucide-react';
+import { Search, MapPin, Trash2, Edit, RotateCcw } from 'lucide-react';
 import { ZoneEditDialog } from './zone-edit-dialog';
 import { deleteZone, updateZone } from '@/actions/zones';
+import { resetZonesToDefaults } from '@/actions/reset-zones';
 import { toast } from 'sonner';
 
 interface ZoneListProps {
@@ -98,6 +99,32 @@ export function ZoneList({ zones: initialZones }: ZoneListProps) {
 
             <ScrollArea className="flex-1">
                 <div className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="h-1 w-1 rounded-full bg-blue-500" />
+                            <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wide">Create New Zone</h3>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={async () => {
+                                if (confirm('Are you sure you want to reset all zones to defaults? This will delete any custom zones.')) {
+                                    startTransition(async () => {
+                                        const result = await resetZonesToDefaults();
+                                        if (result.error) {
+                                            toast.error(result.error);
+                                        } else {
+                                            toast.success(`Reset to ${result.count} default zones`);
+                                        }
+                                    });
+                                }
+                            }}
+                            className="h-6 text-xs text-zinc-500 hover:text-zinc-300"
+                        >
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            Reset Defaults
+                        </Button>
+                    </div>
                     {filteredZones.map((zone) => (
                         <div
                             key={zone.id}

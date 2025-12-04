@@ -442,7 +442,7 @@ export const DEFAULT_ZONES: Zone[] = [
         id: 'default-58',
         name: 'Drayton East',
         lat: 50.84639,
-        lng: -1.04577,
+        lng: -1.042621, // Swapped with West
         radius: 500,
         createdAt: Date.now(),
     },
@@ -450,7 +450,7 @@ export const DEFAULT_ZONES: Zone[] = [
         id: 'default-59',
         name: 'Drayton West',
         lat: 50.84509,
-        lng: -1.042621,
+        lng: -1.04577, // Swapped with East
         radius: 500,
         createdAt: Date.now(),
     },
