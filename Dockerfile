@@ -27,6 +27,9 @@ ENV CACHE_BUST=$CACHE_BUST
 ENV WHAT3WORDS_API_KEY=$WHAT3WORDS_API_KEY
 ENV NODE_ENV=production
 
+# Generate Prisma Client before building
+RUN pnpm run db:generate
+
 # Build the app with environment variables available
 RUN pnpm run build
 
