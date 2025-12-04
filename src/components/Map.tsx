@@ -79,6 +79,7 @@ function LocationTracker() {
     const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
     const map = useMap();
     const watchIdRef = useRef<number | null>(null);
+    const hasCenteredRef = useRef(false);
 
     useEffect(() => {
         // Start continuous location tracking
@@ -92,8 +93,9 @@ function LocationTracker() {
                     setPosition(newPos);
 
                     // On first location, center the map
-                    if (!position) {
+                    if (!hasCenteredRef.current) {
                         map.setView(newPos, 15);
+                        hasCenteredRef.current = true;
                     }
                 },
                 (error) => console.error('Location error:', error),
@@ -111,7 +113,7 @@ function LocationTracker() {
                 navigator.geolocation.clearWatch(watchIdRef.current);
             }
         };
-    }, [map, position]);
+    }, [map]);
 
     if (!position) return null;
 
