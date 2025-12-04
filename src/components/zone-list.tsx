@@ -132,54 +132,6 @@ export function ZoneList({ zones: initialZones }: ZoneListProps) {
                         className="pl-9 bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 h-10"
                     />
                 </div>
-
-                <div className="space-y-3 border-t border-zinc-800 pt-4">
-                    <div className="flex items-center gap-2">
-                        <div className="h-1 w-1 rounded-full bg-blue-500" />
-                        <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wide">Create New Zone</h3>
-                    </div>
-                    <div className="space-y-3 bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-                        <Input
-                            placeholder="Zone name..."
-                            value={newZoneName}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewZoneName(e.target.value)}
-                            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 h-10"
-                        />
-                        <div className="grid grid-cols-2 gap-3">
-                            <Input
-                                type="number"
-                                step="any"
-                                placeholder="Latitude..."
-                                value={newZoneLat}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewZoneLat(e.target.value)}
-                                className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 h-10"
-                            />
-                            <Input
-                                type="number"
-                                step="any"
-                                placeholder="Longitude..."
-                                value={newZoneLng}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewZoneLng(e.target.value)}
-                                className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 h-10"
-                            />
-                        </div>
-                        <Input
-                            type="number"
-                            placeholder="Radius (meters)..."
-                            value={newZoneRadius}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewZoneRadius(e.target.value)}
-                            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 h-10"
-                        />
-                        <Button
-                            onClick={handleCreate}
-                            disabled={isPending || !newZoneName.trim() || !newZoneLat || !newZoneLng}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:bg-zinc-800 disabled:text-zinc-600 h-10 font-medium"
-                        >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Create Zone
-                        </Button>
-                    </div>
-                </div>
             </div>
 
             <ScrollArea className="flex-1">
