@@ -216,8 +216,8 @@ export default function Map({ zones }: MapProps) {
                 };
             case 'dark':
                 return {
-                    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-                    attribution: '&copy; OpenStreetMap'
+                    url: "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+                    attribution: '&copy; OpenStreetMap &copy; CARTO'
                 };
             case 'light':
             default:
@@ -279,6 +279,14 @@ export default function Map({ zones }: MapProps) {
                 <TileLayer
                     url={tileLayer.url}
                 />
+
+                {/* Add labels overlay for dark mode with better visibility */}
+                {mapStyle === 'dark' && (
+                    <TileLayer
+                        url="https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
+                        opacity={0.8}
+                    />
+                )}
 
                 <LocationTracker />
 
