@@ -1,12 +1,13 @@
 import { ZoneManager } from '@/components/zone-manager';
 import { getCachedZones } from '@/lib/cached-zones';
+import type { Zone } from '@prisma/client';
 
 // Force dynamic rendering to avoid build-time database queries
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   // Safely fetch zones, fallback to empty array if database is unavailable
-  let zones = [];
+  let zones: Zone[] = [];
   try {
     zones = await getCachedZones();
   } catch (error) {

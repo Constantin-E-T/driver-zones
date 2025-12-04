@@ -119,6 +119,98 @@ The app can be installed as a Progressive Web App:
 - **UI**: Tailwind CSS, Radix UI, Lucide React
 - **Maps**: Leaflet (React Leaflet)
 - **State**: React 19 (useOptimistic, useTransition)
+- **Database**: PostgreSQL with Prisma ORM
+- **Type Safety**: TypeScript with strict mode
+
+## 📐 TypeScript Best Practices
+
+This project follows strict TypeScript best practices to ensure type safety throughout the application:
+
+### Core Principles
+
+1. **Never use `any`** - Always provide explicit types
+   ```typescript
+   // ❌ Bad
+   let data: any = fetchData();
+   
+   // ✅ Good
+   let data: User[] = fetchData();
+   ```
+
+2. **Leverage Prisma types** - Use generated types from Prisma Client
+   ```typescript
+   import type { Zone, User } from '@prisma/client';
+   ```
+
+3. **Type function parameters and returns**
+   ```typescript
+   // ❌ Bad
+   function getZone(id) {
+     return prisma.zone.findUnique({ where: { id } });
+   }
+   
+   // ✅ Good
+   async function getZone(id: string): Promise<Zone | null> {
+     return prisma.zone.findUnique({ where: { id } });
+   }
+   ```
+
+4. **Use type inference when obvious**
+   ```typescript
+   // Type is inferred as number
+   const count = 42;
+   
+   // But be explicit when it's not clear
+   const zones: Zone[] = [];
+   ```
+
+5. **Avoid type assertions** - Use type guards instead
+   ```typescript
+   // ❌ Bad
+   const zone = data as Zone;
+   
+   // ✅ Good
+   if (isZone(data)) {
+     const zone = data; // TypeScript knows it's a Zone
+   }
+   ```
+
+6. **Use strict null checks**
+   ```typescript
+   // Handle null/undefined explicitly
+   const zone = await getZone(id);
+   if (!zone) {
+     throw new Error('Zone not found');
+   }
+   // Now TypeScript knows zone is not null
+   ```
+
+7. **Type React components properly**
+   ```typescript
+   interface ZoneCardProps {
+     zone: Zone;
+     onDelete: (id: string) => void;
+   }
+   
+   export function ZoneCard({ zone, onDelete }: ZoneCardProps) {
+     // ...
+   }
+   ```
+
+8. **Use const assertions for literal types**
+   ```typescript
+   const mapStyles = ['satellite', 'dark', 'light'] as const;
+   type MapStyle = typeof mapStyles[number]; // 'satellite' | 'dark' | 'light'
+   ```
+
+### Configuration
+
+The project uses strict TypeScript settings in `tsconfig.json`:
+- `strict: true` - Enables all strict type checking options
+- `noImplicitAny: true` - Error on expressions with implied 'any' type
+- `strictNullChecks: true` - Strict null and undefined checks
+- `noUnusedLocals: true` - Error on unused local variables
+- `noUnusedParameters: true` - Error on unused parameters
 
 ## Available UI Components
 
