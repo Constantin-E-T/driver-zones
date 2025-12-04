@@ -92,14 +92,6 @@ export const DEFAULT_ZONES: Zone[] = [
         createdAt: Date.now(),
     },
     {
-        id: 'default-12',
-        name: 'National',
-        lat: 50.805832,
-        lng: -1.087222,
-        radius: 500,
-        createdAt: Date.now(),
-    },
-    {
         id: 'default-13',
         name: 'Fawcett Road',
         lat: 50.793789,
@@ -150,8 +142,8 @@ export const DEFAULT_ZONES: Zone[] = [
     {
         id: 'default-19',
         name: 'Havant West',
-        lat: 50.8567,
-        lng: -0.9856,
+        lat: 50.8570,
+        lng: -0.9950,
         radius: 500,
         createdAt: Date.now(),
     },
@@ -192,14 +184,6 @@ export const DEFAULT_ZONES: Zone[] = [
         name: 'Buckland',
         lat: 50.810,
         lng: -1.075,
-        radius: 500,
-        createdAt: Date.now(),
-    },
-    {
-        id: 'default-25',
-        name: 'City Centre Sth',
-        lat: 50.805832,
-        lng: -1.087222,
         radius: 500,
         createdAt: Date.now(),
     },
@@ -296,14 +280,6 @@ export const DEFAULT_ZONES: Zone[] = [
         name: 'Elm Grove',
         lat: 50.7890,
         lng: -1.0860,
-        radius: 500,
-        createdAt: Date.now(),
-    },
-    {
-        id: 'default-38',
-        name: 'Hilsea West',
-        lat: 50.83,
-        lng: -1.07,
         radius: 500,
         createdAt: Date.now(),
     },
@@ -495,14 +471,6 @@ export const DEFAULT_ZONES: Zone[] = [
         radius: 500,
         createdAt: Date.now(),
     },
-    {
-        id: 'default-62',
-        name: 'Rowner South',
-        lat: 50.822,
-        lng: -1.176,
-        radius: 500,
-        createdAt: Date.now(),
-    },
     // Waterlooville zones
     {
         id: 'default-63',
@@ -528,14 +496,6 @@ export const DEFAULT_ZONES: Zone[] = [
         radius: 500,
         createdAt: Date.now(),
     },
-    {
-        id: 'default-66',
-        name: 'Warren Park',
-        lat: 50.868889,
-        lng: -0.986944,
-        radius: 500,
-        createdAt: Date.now(),
-    },
     // Fareham zones
     {
         id: 'default-67',
@@ -557,8 +517,8 @@ export const DEFAULT_ZONES: Zone[] = [
     {
         id: 'default-69',
         name: 'Havant East',
-        lat: 50.8567,
-        lng: -0.98559,
+        lat: 50.8560,
+        lng: -0.9780,
         radius: 500,
         createdAt: Date.now(),
     },
@@ -686,14 +646,7 @@ export const DEFAULT_ZONES: Zone[] = [
         createdAt: Date.now(),
     },
     // Cosham additional zones
-    {
-        id: 'default-85',
-        name: 'Cosham High Street',
-        lat: 50.84654,
-        lng: -1.06344,
-        radius: 500,
-        createdAt: Date.now(),
-    },
+    // Cosham High Street removed as it was a duplicate of Cosham
     // Waterlooville additional zones
     {
         id: 'default-86',

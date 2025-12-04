@@ -5,9 +5,9 @@ import { Zone } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, MapPin, Trash2, Edit, Plus } from 'lucide-react';
+import { Search, MapPin, Trash2, Edit } from 'lucide-react';
 import { ZoneEditDialog } from './zone-edit-dialog';
-import { createZone, deleteZone, updateZone } from '@/actions/zones';
+import { deleteZone, updateZone } from '@/actions/zones';
 import { toast } from 'sonner';
 
 interface ZoneListProps {
@@ -31,10 +31,6 @@ export function ZoneList({ zones: initialZones }: ZoneListProps) {
     const [isPending, startTransition] = useTransition();
     const [search, setSearch] = useState('');
     const [editingZone, setEditingZone] = useState<Zone | null>(null);
-    const [newZoneName, setNewZoneName] = useState('');
-    const [newZoneLat, setNewZoneLat] = useState('');
-    const [newZoneLng, setNewZoneLng] = useState('');
-    const [newZoneRadius, setNewZoneRadius] = useState('500');
 
     const filteredZones = zones.filter((zone) =>
         zone.name.toLowerCase().includes(search.toLowerCase())
@@ -52,41 +48,7 @@ export function ZoneList({ zones: initialZones }: ZoneListProps) {
         });
     };
 
-    const handleCreate = async () => {
-        const lat = parseFloat(newZoneLat);
-        const lng = parseFloat(newZoneLng);
-        const radius = parseInt(newZoneRadius);
 
-        if (!newZoneName.trim() || isNaN(lat) || isNaN(lng) || isNaN(radius)) {
-            toast.error('Please fill in all fields with valid values');
-            return;
-        }
-
-        const tempId = crypto.randomUUID();
-        const newZone: Zone = {
-            id: tempId,
-            name: newZoneName,
-            lat,
-            lng,
-            radius,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
-
-        startTransition(async () => {
-            addOptimisticZone(newZone);
-            const result = await createZone({ name: newZoneName, lat, lng, radius });
-            if (result.error) {
-                toast.error('Failed to create zone');
-            } else {
-                toast.success('Zone created');
-                setNewZoneName('');
-                setNewZoneLat('');
-                setNewZoneLng('');
-                setNewZoneRadius('500');
-            }
-        });
-    };
 
     const handleUpdate = async (id: string, data: Partial<Zone>) => {
         const existingZone = zones.find((z) => z.id === id);
