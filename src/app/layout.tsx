@@ -34,12 +34,21 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+// Force dynamic rendering to avoid build-time database queries
+export const dynamic = 'force-dynamic';
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const zoneCount = await getCachedZoneCount();
+  // Safely fetch zone count, fallback to 0 if database is unavailable
+  let zoneCount = 0;
+  try {
+    zoneCount = await getCachedZoneCount();
+  } catch (error) {
+    console.error('Failed to fetch zone count:', error);
+  }
 
   return (
     <html lang="en">
