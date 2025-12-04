@@ -487,7 +487,12 @@ export default function Map({ zones, centerOnZone }: MapProps) {
                             </Tooltip>
                             {isSelected && userLocation && (
                                 <Popup
-                                    onClose={() => setSelectedZone(null)}
+                                    eventHandlers={{
+                                        remove: () => {
+                                            setSelectedZone(null);
+                                            setRouteInfo(null);
+                                        },
+                                    }}
                                     closeButton={true}
                                     className="custom-popup"
                                     autoClose={false}

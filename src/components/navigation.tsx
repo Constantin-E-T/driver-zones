@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { MapPin, List, Map } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface NavigationProps {
     zoneCount?: number;
@@ -46,9 +47,9 @@ export function Navigation({ zoneCount = 0 }: NavigationProps) {
                                     <Icon className="h-4 w-4" />
                                     <span>{link.label}</span>
                                     {link.badge !== undefined && link.badge > 0 && (
-                                        <span className="ml-1 px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full font-semibold">
-                                            {link.badge}
-                                        </span>
+                                        <Badge variant="default" className="ml-1 bg-blue-500 hover:bg-blue-600 text-white border-0">
+                                            {link.badge > 99 ? '99+' : link.badge}
+                                        </Badge>
                                     )}
                                 </Link>
                             );
@@ -75,17 +76,15 @@ export function Navigation({ zoneCount = 0 }: NavigationProps) {
                                         : 'text-zinc-500 active:text-zinc-300'
                                 )}
                             >
-                                <div className="relative">
-                                    <Icon className={cn(
-                                        'h-6 w-6 transition-transform',
-                                        isActive && 'scale-110'
-                                    )} />
-                                    {link.badge !== undefined && link.badge > 0 && (
-                                        <span className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-blue-500 text-white text-xs rounded-full font-bold min-w-[20px] text-center">
-                                            {link.badge > 99 ? '99+' : link.badge}
-                                        </span>
-                                    )}
-                                </div>
+                                <Icon className={cn(
+                                    'h-6 w-6 transition-transform',
+                                    isActive && 'scale-110'
+                                )} />
+                                {link.badge !== undefined && link.badge > 0 && (
+                                    <Badge variant="default" className="absolute top-2 left-1/2 -translate-x-1/2 translate-x-3 min-w-[22px] h-[22px] flex items-center justify-center p-0 px-1.5 bg-blue-500 hover:bg-blue-600 text-white border-0">
+                                        {link.badge > 99 ? '99+' : link.badge}
+                                    </Badge>
+                                )}
                                 <span className={cn(
                                     'text-xs font-medium',
                                     isActive && 'font-semibold'
