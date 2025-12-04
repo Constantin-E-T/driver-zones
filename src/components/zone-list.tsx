@@ -13,9 +13,10 @@ import { toast } from 'sonner';
 
 interface ZoneListProps {
     zones: Zone[];
+    onZoneClick?: (zone: Zone) => void;
 }
 
-export function ZoneList({ zones: initialZones }: ZoneListProps) {
+export function ZoneList({ zones: initialZones, onZoneClick }: ZoneListProps) {
     const [zones, addOptimisticZone] = useOptimistic(
         initialZones,
         (state, newZone: Zone | { type: 'delete'; id: string } | { type: 'update'; zone: Zone }) => {
@@ -128,7 +129,8 @@ export function ZoneList({ zones: initialZones }: ZoneListProps) {
                     {filteredZones.map((zone) => (
                         <div
                             key={zone.id}
-                            className="group relative flex items-center justify-between p-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all duration-200"
+                            className="group relative flex items-center justify-between p-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all duration-200 cursor-pointer"
+                            onClick={() => onZoneClick?.(zone)}
                         >
                             <div className="flex-1 min-w-0 pr-3">
                                 <div className="flex items-center gap-2 mb-2">
@@ -152,7 +154,10 @@ export function ZoneList({ zones: initialZones }: ZoneListProps) {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => setEditingZone(zone)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingZone(zone);
+                                    }}
                                     className="h-9 w-9 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
                                     title="Edit zone"
                                     disabled={isPending}
@@ -162,7 +167,10 @@ export function ZoneList({ zones: initialZones }: ZoneListProps) {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => handleDelete(zone.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(zone.id);
+                                    }}
                                     className="h-9 w-9 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                                     title="Delete zone"
                                     disabled={isPending}

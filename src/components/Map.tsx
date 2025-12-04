@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Tooltip, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Tooltip, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Zone } from '@prisma/client';
-import { Plus, MapPin as MapPinIcon } from 'lucide-react';
+import { Plus, MapPin as MapPinIcon, MapPin, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QuickZoneDialog } from './quick-zone-dialog';
 
@@ -97,10 +97,52 @@ const createPlacementIcon = () => {
 
 interface MapProps {
     zones: Zone[];
+    centerOnZone?: { lat: number; lng: number } | null;
+}
+
+// Fetch driving route from OSRM (Open Source Routing Machine)
+async function getDrivingRoute(
+    fromLat: number,
+    fromLng: number,
+    toLat: number,
+    toLng: number
+): Promise<{ distance: number; duration: number } | null> {
+    try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=false`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+            return {
+                distance: data.routes[0].distance / 1000, // Convert meters to km
+                duration: data.routes[0].duration / 60, // Convert seconds to minutes
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching route:', error);
+        return null;
+    }
+}
+
+// Format travel time from minutes
+function formatTravelTime(minutes: number): string {
+    if (minutes < 1) return 'Less than 1 min';
+    if (minutes < 60) return `${Math.round(minutes)} min`;
+
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+    return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
 }
 
 // Continuous location tracking marker
-function LocationTracker() {
+function LocationTracker({
+    onLocationUpdate,
+    disableAutoCenter
+}: {
+    onLocationUpdate: (pos: { lat: number; lng: number }) => void;
+    disableAutoCenter?: boolean;
+}) {
     const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
     const map = useMap();
     const watchIdRef = useRef<number | null>(null);
@@ -116,9 +158,10 @@ function LocationTracker() {
                         lng: pos.coords.longitude,
                     };
                     setPosition(newPos);
+                    onLocationUpdate(newPos);
 
-                    // On first location, center the map
-                    if (!hasCenteredRef.current) {
+                    // On first location, center the map (unless disabled)
+                    if (!hasCenteredRef.current && !disableAutoCenter) {
                         map.setView(newPos, 15);
                         hasCenteredRef.current = true;
                     }
@@ -138,7 +181,7 @@ function LocationTracker() {
                 navigator.geolocation.clearWatch(watchIdRef.current);
             }
         };
-    }, [map]);
+    }, [map, onLocationUpdate, disableAutoCenter]);
 
     if (!position) return null;
 
@@ -191,6 +234,47 @@ function PlacementMarker({
     );
 }
 
+// Component to handle map centering
+function MapCenterController({ center }: { center: { lat: number; lng: number } | null }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (center) {
+            map.setView([center.lat, center.lng], 16, {
+                animate: true,
+                duration: 0.5,
+            });
+        }
+    }, [center, map]);
+
+    return null;
+}
+
+// Component to handle recentering on user location
+function RecenterController({
+    shouldRecenter,
+    userLocation,
+    onComplete
+}: {
+    shouldRecenter: boolean;
+    userLocation: { lat: number; lng: number } | null;
+    onComplete: () => void;
+}) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (shouldRecenter && userLocation) {
+            map.setView([userLocation.lat, userLocation.lng], 15, {
+                animate: true,
+                duration: 0.5,
+            });
+            onComplete();
+        }
+    }, [shouldRecenter, userLocation, map, onComplete]);
+
+    return null;
+}
+
 // Component to handle map events like zoom
 function MapEvents({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
     const map = useMapEvents({
@@ -201,11 +285,36 @@ function MapEvents({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
     return null;
 }
 
-export default function Map({ zones }: MapProps) {
+export default function Map({ zones, centerOnZone }: MapProps) {
     const [mapStyle, setMapStyle] = useState<'satellite' | 'dark' | 'light'>('satellite');
     const [isPlacementMode, setIsPlacementMode] = useState(false);
     const [placementPosition, setPlacementPosition] = useState<{ lat: number; lng: number } | null>(null);
     const [showQuickDialog, setShowQuickDialog] = useState(false);
+    const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [selectedZone, setSelectedZone] = useState<Zone | null>(null);
+    const [routeInfo, setRouteInfo] = useState<{ distance: number; duration: number } | null>(null);
+    const [loadingRoute, setLoadingRoute] = useState(false);
+    const [shouldRecenter, setShouldRecenter] = useState(false);
+
+    // Fetch driving route when a zone is selected
+    useEffect(() => {
+        if (selectedZone && userLocation) {
+            setLoadingRoute(true);
+            setRouteInfo(null);
+            getDrivingRoute(
+                userLocation.lat,
+                userLocation.lng,
+                selectedZone.lat,
+                selectedZone.lng
+            ).then((route) => {
+                setRouteInfo(route);
+                setLoadingRoute(false);
+            });
+        } else {
+            setRouteInfo(null);
+            setLoadingRoute(false);
+        }
+    }, [selectedZone, userLocation]);
 
     const getTileLayer = () => {
         switch (mapStyle) {
@@ -288,7 +397,18 @@ export default function Map({ zones }: MapProps) {
                     />
                 )}
 
-                <LocationTracker />
+                <LocationTracker
+                    onLocationUpdate={setUserLocation}
+                    disableAutoCenter={!!centerOnZone}
+                />
+
+                {centerOnZone && <MapCenterController center={centerOnZone} />}
+
+                <RecenterController
+                    shouldRecenter={shouldRecenter}
+                    userLocation={userLocation}
+                    onComplete={() => setShouldRecenter(false)}
+                />
 
                 {isPlacementMode && placementPosition && (
                     <PlacementMarker
@@ -297,30 +417,97 @@ export default function Map({ zones }: MapProps) {
                     />
                 )}
 
-                {zones.map((zone) => (
-                    <Marker
-                        key={zone.id}
-                        position={[zone.lat, zone.lng]}
-                        icon={createZoneIcon()}
-                    >
-                        <Tooltip
-                            permanent
-                            direction="top"
-                            offset={[0, -20]}
-                            className="!bg-red-600 !border-white !border-2 !shadow-lg !px-3 !py-1 !rounded-full"
+                {zones.map((zone) => {
+                    const isSelected = selectedZone?.id === zone.id;
+
+                    return (
+                        <Marker
+                            key={zone.id}
+                            position={[zone.lat, zone.lng]}
+                            icon={createZoneIcon()}
+                            eventHandlers={{
+                                click: () => setSelectedZone(zone),
+                            }}
                         >
-                            <div style={{
-                                color: 'white',
-                                fontWeight: '700',
-                                fontSize: '13px',
-                                whiteSpace: 'nowrap',
-                                letterSpacing: '0.3px',
-                            }}>
-                                {zone.name}
-                            </div>
-                        </Tooltip>
-                    </Marker>
-                ))}
+                            <Tooltip
+                                permanent
+                                direction="top"
+                                offset={[0, -20]}
+                                className="!bg-red-600 !border-white !border-2 !shadow-lg !px-3 !py-1 !rounded-full"
+                            >
+                                <div style={{
+                                    color: 'white',
+                                    fontWeight: '700',
+                                    fontSize: '13px',
+                                    whiteSpace: 'nowrap',
+                                    letterSpacing: '0.3px',
+                                }}>
+                                    {zone.name}
+                                </div>
+                            </Tooltip>
+                            {isSelected && userLocation && (
+                                <Popup
+                                    onClose={() => setSelectedZone(null)}
+                                    closeButton={true}
+                                    className="custom-popup"
+                                    autoClose={false}
+                                >
+                                    <div className="p-3 min-w-[220px]">
+                                        <h3 className="font-bold text-lg mb-3 text-zinc-900">{zone.name}</h3>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex items-center gap-2 text-zinc-700">
+                                                <MapPin className="h-4 w-4 text-blue-500" />
+                                                <span className="font-mono text-xs">
+                                                    {zone.lat.toFixed(4)}, {zone.lng.toFixed(4)}
+                                                </span>
+                                            </div>
+                                            <div className="h-px bg-zinc-200 my-2" />
+                                            {loadingRoute ? (
+                                                <div className="py-4">
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-zinc-600 font-medium">Driving distance:</span>
+                                                            <div className="h-5 w-16 bg-zinc-200 rounded animate-pulse"></div>
+                                                        </div>
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-zinc-600 font-medium">Drive time:</span>
+                                                            <div className="h-5 w-16 bg-zinc-200 rounded animate-pulse"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-zinc-200">
+                                                        <div className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-emerald-600 border-t-transparent"></div>
+                                                        <span className="text-xs text-zinc-500">Calculating route...</span>
+                                                    </div>
+                                                </div>
+                                            ) : routeInfo ? (
+                                                <div className="space-y-2 py-2">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-zinc-600 font-medium">Driving distance:</span>
+                                                        <span className="font-semibold text-zinc-900">
+                                                            {routeInfo.distance < 1
+                                                                ? `${Math.round(routeInfo.distance * 1000)}m`
+                                                                : `${routeInfo.distance.toFixed(1)}km`}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-zinc-600 font-medium">Drive time:</span>
+                                                        <span className="font-semibold text-emerald-600">
+                                                            {formatTravelTime(routeInfo.duration)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-3 text-zinc-500 text-xs bg-zinc-50 rounded">
+                                                    Unable to calculate route
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </Popup>
+                            )}
+                        </Marker>
+                    );
+                })}
             </MapContainer>
 
             {/* Controls Overlay */}
@@ -337,6 +524,16 @@ export default function Map({ zones }: MapProps) {
                     title="Change map style"
                 >
                     <span className="text-xl">{mapStyle === 'satellite' ? "🛰️" : mapStyle === 'dark' ? "🌙" : "☀️"}</span>
+                </Button>
+                <Button
+                    variant="secondary"
+                    size="icon"
+                    onClick={() => setShouldRecenter(true)}
+                    className="rounded-full h-12 w-12 shadow-lg bg-blue-600/90 backdrop-blur-sm text-white border border-blue-500 hover:bg-blue-700"
+                    title="Center on my location"
+                    disabled={!userLocation}
+                >
+                    <Navigation className="h-5 w-5" fill="currentColor" />
                 </Button>
             </div>
 
