@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
+import { Providers } from "@/components/providers";
 import { Navigation } from "@/components/navigation";
 import { getCachedZoneCount } from "@/lib/cached-zones";
 import "./globals.css";
@@ -48,7 +48,7 @@ export default async function RootLayout({
       >
         <Navigation zoneCount={zoneCount} />
         {children}
-        <Toaster richColors position="top-center" />
+        <Providers />
       </body>
     </html>
   );
