@@ -5,6 +5,7 @@ import { Zone } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import { Search, MapPin, Trash2, Edit, RotateCcw } from 'lucide-react';
 import { ZoneEditDialog } from './zone-edit-dialog';
 import { deleteZone, updateZone } from '@/actions/zones';
@@ -82,9 +83,9 @@ export function ZoneList({ zones: initialZones, onZoneClick }: ZoneListProps) {
                             <p className="text-sm text-zinc-400">Manage your driver zones</p>
                         </div>
                     </div>
-                    <div className="px-3 py-1.5 bg-zinc-800 rounded-lg border border-zinc-700">
-                        <span className="text-sm font-medium text-zinc-300">{zones.length} total</span>
-                    </div>
+                    <Badge variant="secondary" className="text-base px-4 py-1.5">
+                        {zones.length}
+                    </Badge>
                 </div>
 
                 <div className="relative">

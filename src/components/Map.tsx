@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Tooltip, Popup, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Tooltip, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Zone } from '@prisma/client';
 import { Plus, MapPin as MapPinIcon, MapPin, Navigation } from 'lucide-react';
@@ -106,16 +106,21 @@ async function getDrivingRoute(
     fromLng: number,
     toLat: number,
     toLng: number
-): Promise<{ distance: number; duration: number } | null> {
+): Promise<{ distance: number; duration: number; geometry: [number, number][] } | null> {
     try {
-        const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=false`;
+        const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
         const response = await fetch(url);
         const data = await response.json();
 
         if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+            const route = data.routes[0];
+            // Convert GeoJSON coordinates [lng, lat] to Leaflet format [lat, lng]
+            const geometry = route.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+
             return {
-                distance: data.routes[0].distance / 1000, // Convert meters to km
-                duration: data.routes[0].duration / 60, // Convert seconds to minutes
+                distance: route.distance / 1000, // Convert meters to km
+                duration: route.duration / 60, // Convert seconds to minutes
+                geometry: geometry,
             };
         }
         return null;
@@ -285,6 +290,25 @@ function MapEvents({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
     return null;
 }
 
+// Component to fit route bounds
+function RouteBoundsFitter({ routeGeometry }: { routeGeometry: [number, number][] | null }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (routeGeometry && routeGeometry.length > 0) {
+            const bounds = L.latLngBounds(routeGeometry);
+            map.fitBounds(bounds, {
+                padding: [50, 50],
+                maxZoom: 15,
+                animate: true,
+                duration: 0.5,
+            });
+        }
+    }, [routeGeometry, map]);
+
+    return null;
+}
+
 export default function Map({ zones, centerOnZone }: MapProps) {
     const [mapStyle, setMapStyle] = useState<'satellite' | 'dark' | 'light'>('satellite');
     const [isPlacementMode, setIsPlacementMode] = useState(false);
@@ -292,7 +316,7 @@ export default function Map({ zones, centerOnZone }: MapProps) {
     const [showQuickDialog, setShowQuickDialog] = useState(false);
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [selectedZone, setSelectedZone] = useState<Zone | null>(null);
-    const [routeInfo, setRouteInfo] = useState<{ distance: number; duration: number } | null>(null);
+    const [routeInfo, setRouteInfo] = useState<{ distance: number; duration: number; geometry: [number, number][] } | null>(null);
     const [loadingRoute, setLoadingRoute] = useState(false);
     const [shouldRecenter, setShouldRecenter] = useState(false);
 
@@ -410,6 +434,22 @@ export default function Map({ zones, centerOnZone }: MapProps) {
                     onComplete={() => setShouldRecenter(false)}
                 />
 
+                <RouteBoundsFitter routeGeometry={routeInfo?.geometry || null} />
+
+                {/* Draw route path if available */}
+                {routeInfo && routeInfo.geometry && (
+                    <Polyline
+                        positions={routeInfo.geometry}
+                        pathOptions={{
+                            color: '#3b82f6',
+                            weight: 5,
+                            opacity: 0.8,
+                            lineJoin: 'round',
+                            lineCap: 'round',
+                        }}
+                    />
+                )}
+
                 {isPlacementMode && placementPosition && (
                     <PlacementMarker
                         initialPosition={placementPosition}
@@ -451,6 +491,7 @@ export default function Map({ zones, centerOnZone }: MapProps) {
                                     closeButton={true}
                                     className="custom-popup"
                                     autoClose={false}
+                                    autoPan={true}
                                 >
                                     <div className="p-3 min-w-[220px]">
                                         <h3 className="font-bold text-lg mb-3 text-zinc-900">{zone.name}</h3>
@@ -541,7 +582,7 @@ export default function Map({ zones, centerOnZone }: MapProps) {
             {!isPlacementMode && (
                 <Button
                     onClick={handleAddZoneClick}
-                    className="absolute bottom-24 right-4 md:bottom-4 z-[1000] h-14 w-14 rounded-full shadow-2xl bg-emerald-600 hover:bg-emerald-700 text-white border-2 border-white transition-all duration-200 hover:scale-110"
+                    className="absolute bottom-32 right-4 md:bottom-8 z-[1000] h-14 w-14 rounded-full shadow-2xl bg-emerald-600 hover:bg-emerald-700 text-white border-2 border-white transition-all duration-200 hover:scale-110"
                     title="Add new zone"
                 >
                     <Plus className="h-6 w-6" />
